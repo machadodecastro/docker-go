@@ -1,8 +1,20 @@
-FROM golang:latest
+FROM golang:alpine3.14 as builder
 
-WORKDIR /usr/app
+WORKDIR /app
 
-COPY . /usr/app
+COPY . .
 
-RUN go mod init hello && \
-  go run .
+RUN go build -o /main hello.go
+
+
+## Deploy
+## Strach base debian, serve para imagens super mínimas(Que contém apenas um único binários)
+FROM scratch
+
+WORKDIR /
+
+COPY --from=builder /main /main
+
+EXPOSE 8080
+
+ENTRYPOINT ["/main"]
